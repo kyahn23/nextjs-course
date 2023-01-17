@@ -1,36 +1,59 @@
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 
 function LastSalesPage() {
   const [sales, setSales] = useState();
-  const [isLoading, setIsLoading] = useState();
-  useEffect(() => {
-    setIsLoading(true);
-    fetch(
-      "https://nextjs-study-57cf3-default-rtdb.asia-southeast1.firebasedatabase.app/sales.json"
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        const transformedSales = [];
-        for (const key in data) {
-          if (Object.hasOwnProperty.call(data, key)) {
-            transformedSales.push({
-              id: key,
-              username: data[key].username,
-              volume: data[key].volume,
-            });
-          }
-        }
-        setSales(transformedSales);
-        setIsLoading(false);
-      });
-  }, []);
+  //   const [isLoading, setIsLoading] = useState();
 
-  if (isLoading) {
+  const fetcher = (...args) => fetch(...args).then((res) => res.json());
+  const { data, error, isLoading } = useSWR(
+    "https://nextjs-study-57cf3-default-rtdb.asia-southeast1.firebasedatabase.app/sales.json",
+    fetcher
+  );
+
+  useEffect(() => {
+    console.log(data);
+    if (data) {
+      const transformedSales = [];
+      for (const key in data) {
+        transformedSales.push({
+          id: key,
+          username: data[key].username,
+          volume: data[key].volume,
+        });
+      }
+      setSales(transformedSales);
+    }
+  }, [data]);
+
+  //   useEffect(() => {
+  //     setIsLoading(true);
+  //     fetch(
+  //       "https://nextjs-study-57cf3-default-rtdb.asia-southeast1.firebasedatabase.app/sales.json"
+  //     )
+  //       .then((response) => response.json())
+  //       .then((data) => {
+  //         const transformedSales = [];
+  //         for (const key in data) {
+  //           if (Object.hasOwnProperty.call(data, key)) {
+  //             transformedSales.push({
+  //               id: key,
+  //               username: data[key].username,
+  //               volume: data[key].volume,
+  //             });
+  //           }
+  //         }
+  //         setSales(transformedSales);
+  //         setIsLoading(false);
+  //       });
+  //   }, []);
+
+  if (isLoading || !sales || !data) {
     return <p>Loading...</p>;
   }
 
-  if (!sales) {
-    return <p>No data yet</p>;
+  if (error) {
+    return <p>Failed to load.</p>;
   }
 
   return (
