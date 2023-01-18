@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 
-function LastSalesPage() {
-  const [sales, setSales] = useState();
+function LastSalesPage(props) {
+  const [sales, setSales] = useState(props.sales);
   //   const [isLoading, setIsLoading] = useState();
 
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
@@ -12,7 +12,6 @@ function LastSalesPage() {
   );
 
   useEffect(() => {
-    console.log(data);
     if (data) {
       const transformedSales = [];
       for (const key in data) {
@@ -48,7 +47,7 @@ function LastSalesPage() {
   //       });
   //   }, []);
 
-  if (isLoading || !sales || !data) {
+  if (!sales && !data) {
     return <p>Loading...</p>;
   }
 
@@ -65,6 +64,25 @@ function LastSalesPage() {
       ))}
     </ul>
   );
+}
+
+export async function getStaticProps() {
+  const response = await fetch(
+    "https://nextjs-study-57cf3-default-rtdb.asia-southeast1.firebasedatabase.app/sales.json"
+  );
+  const data = await response.json();
+  const transformedSales = [];
+  for (const key in data) {
+    if (Object.hasOwnProperty.call(data, key)) {
+      transformedSales.push({
+        id: key,
+        username: data[key].username,
+        volume: data[key].volume,
+      });
+    }
+  }
+
+  return { props: { sales: transformedSales } };
 }
 
 export default LastSalesPage;
