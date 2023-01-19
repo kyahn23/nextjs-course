@@ -1,14 +1,18 @@
 import EventSummary from "../../components/event-detail/event-summary";
 import EventLogistics from "../../components/event-detail/event-logistics";
 import EventContent from "../../components/event-detail/event-content";
-import { getAllEvents, getEventById } from "../../helpers/api-util";
+import { getEventById, getFeaturedEvents } from "../../helpers/api-util";
 
 function EventDetailPage(props) {
   // const router = useRouter();
   // const eventId = router.query.eventid;
   const event = props.selectedEvent;
   if (!event) {
-    return <p>No Event found!</p>;
+    return (
+      <div className="center">
+        <p>Loading...</p>
+      </div>
+    );
   }
   return (
     <div>
@@ -37,17 +41,18 @@ export async function getStaticProps(context) {
     props: {
       selectedEvent: event,
     },
+    revalidate: 30,
   };
 }
 
 export async function getStaticPaths() {
-  const events = await getAllEvents();
+  const events = await getFeaturedEvents();
   const paths = events.map((event) => ({
     params: { eventid: event.id },
   }));
 
   return {
     paths: paths,
-    fallback: false,
+    fallback: "blocking",
   };
 }
