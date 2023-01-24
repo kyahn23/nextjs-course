@@ -1,3 +1,4 @@
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { Fragment, useEffect, useState } from "react";
 import useSWR from "swr";
@@ -15,7 +16,7 @@ export default function FilteredEventsPage(props) {
 
   const filterData = router.query.slug;
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error } = useSWR(
     "https://nextjs-study-57cf3-default-rtdb.asia-southeast1.firebasedatabase.app/events.json",
     fetcher
   );
@@ -87,10 +88,18 @@ export default function FilteredEventsPage(props) {
 
   const date = new Date(numYear, numMonth - 1);
   return (
-    <div>
+    <Fragment>
+      <Head>
+        <title>Filtered Events</title>
+        <meta
+          name="description"
+          content={`All events for ${numMonth}/${numYear}`}
+        />
+      </Head>
+
       <ResultsTitle date={date} />
       <EventList items={filteredEvents} />
-    </div>
+    </Fragment>
   );
 }
 
